@@ -1,120 +1,162 @@
 import heapq
-import argparse
-
-MAX_ITERS = 1000000 
+import sys
+import json
 
 class State:
     def __init__(self, stacks):
-        self.stacks = stacks  # List of stacks, each stack is a list of blocks
+        self.stacks = stacks
     
-    # TODO: Implement methods to manipulate and compare states
+    def move_block(self, source_stack_idx, dest_stack_idx):
+
+        if (0 <= source_stack_idx < len(self.stacks) and 0 <= dest_stack_idx < len(self.stacks) and source_stack_idx != dest_stack_idx):
+            source_stack = self.stacks[source_stack_idx]
+            dest_stack = self.stacks[dest_stack_idx]
+
+            if source_stack:
+                block = source_stack.pop()
+                dest_stack.append(block)
+
+    def to_json(self):
+        return json.dumps(self.stacks)
+
+    def __str__(self):
+        state_str = ""
+        for stack in self.stacks:
+            state_str += "".join(stack) + "\n"
+        return state_str
+    
+    def __hash__(self):
+        return hash(tuple(tuple(stack) for stack in self.stacks))
+
+    def __eq__(self, other):
+        return self.stacks == other.stacks
 
 class Node:
-    def __init__(self, state, parent, depth, cost):
+    def __init__(self, state, parent=None, action=None, depth=0):
         self.state = state
-        self.parent = parent
-        self.depth = depth
-        self.cost = cost
-    
-    # TODO: Implement methods to compare nodes based on cost and for traceback
+        self.parent = parent  # Parent Node
+        self.action = action  # Action that led to this state
+        self.depth = depth    # Depth in the tree
 
-def heuristic(state, goal_state):
-    # Implement your heuristic function (h(n)) here
-    misplaced_blocks = 0
+    def successors(self):
+        child_nodes = []
+        current_state = self.state
+        num_stacks = len(current_state.stacks)
 
-    # Iterate through stacks in the current state
-    for current_stack, goal_stack in zip(state.stacks, goal_state.stacks):
-        for block, goal_block in zip(current_stack, goal_stack):
-            if block != goal_block:
-                misplaced_blocks += 1
+        for source_stack_idx in range(num_stacks):
+            source_stack = current_state.stacks[source_stack_idx]
 
-    return misplaced_blocks
-    #pass
+            if source_stack:
+                for dest_stack_idx in range(num_stacks):
+                    if source_stack_idx != dest_stack_idx:
+                        new_state = State([list(stack) for stack in current_state.stacks])
 
-def successors(node, goal_state):
-    successor_nodes = []
+                        new_state.move_block(source_stack_idx, dest_stack_idx)
 
-    # Generate successor states based on valid moves
-    for move in generate_valid_moves(node.state):
-        new_state = apply_move(node.state, move)
-        cost = node.depth + 1  # You can adjust the cost based on your implementation
+                        action = f"Move block from stack {source_stack_idx} to stack {dest_stack_idx}"
+                        child_node = Node(new_state, parent=self, action=action, depth=self.depth + 1)
+                        child_nodes.append(child_node)
 
-        # Create a new successor node
-        successor_node = Node(new_state, node, node.depth + 1, cost)
-        successor_nodes.append(successor_node)
+        return child_nodes
 
-    return successor_nodes
-    #pass
+def parse_file(file_path):
+    initial_state = []
+    goal_state = []
+    delimiter = 0
 
-def astar(initial_state, goal_state, max_iterations):
-    open_list = []  # Priority queue
-    closed_set = set()  # Set to keep track of visited states
+    try:
+        with open(file_path, 'r') as file:
+            for line in file:
+                line = line.strip()
+                if line == '>>>>>>>>>>':
+                    delimiter += 1
+                elif delimiter == 0:
+                    continue
+                elif delimiter == 1:
+                    initial_state.append(line)
+                elif delimiter == 2:
+                    goal_state.append(line)
 
-    start_node = Node(initial_state, None, 0, 0)
-    heapq.heappush(open_list, (start_node.cost + heuristic(initial_state, goal_state), start_node))
+    except FileNotFoundError:
+        print(f"File not found: {file_path}")
+        return None, None
 
-    iterations = 0
-
-    while open_list:
-        current_node = heapq.heappop(open_list)[1]
-
-        if current_node.state == goal_state:
-            # Trace back to construct the solution path
-            path = []
-            while current_node:
-                path.append(current_node.state)
-                current_node = current_node.parent
-            path.reverse()
-            return path, iterations, len(open_list)
-
-        if iterations >= max_iterations:
-            return "FAILED", iterations, len(open_list)
-
-        closed_set.add(current_node.state)
-
-        for successor in successors(current_node, goal_state):
-            if successor.state not in closed_set:
-                heapq.heappush(open_list, (successor.cost + heuristic(successor.state, goal_state), successor))
-
-        iterations += 1
-
-    return "FAILED", iterations, len(open_list)
-
-def parse_arguments():
-    parser = argparse.ArgumentParser(description="Blocksworld Solver")
-    parser.add_argument("filename", help="Input file containing the problem description")
-    parser.add_argument("-H", "--heuristic", choices=["H0", "H1", "H2"], default="H0", help="Heuristic function to use (default: H0)")
-    parser.add_argument("-MAX_ITERS", type=int, default=1000000, help="Maximum number of iterations (default: 1000000)")
-    return parser.parse_args()
-
-def parse_input_file(filename):
-    with open(filename, 'r') as file:
-        lines = file.readlines()
-
-    num_stacks, num_blocks, num_moves = map(int, lines[0].split())
-
-    initial_state_lines = [list(line.strip()) for line in lines[2:2+num_stacks]]
-    initial_state = State(initial_state_lines)  # Assuming you have a State constructor
-
-    goal_state_lines = [list(line.strip()) for line in lines[3+num_stacks:3+2*num_stacks]]
-    goal_state = State(goal_state_lines)  # Assuming you have a State constructor
+    initial_state = State([list(stack) for stack in initial_state])
+    goal_state = State([list(stack) for stack in goal_state])
 
     return initial_state, goal_state
 
+def print_state(state):
+    for stack in state.stacks:
+        print("".join(stack))
+    print() 
+
+def heuristic_h0(state, goal_state):
+    pass
+
+def bfs(initial_state, goal_state):
+    frontier = [Node(initial_state)]
+    reached = set()
+    reached_hashes = set()
+
+    step = 1
+    while frontier:
+        node = frontier.pop(0)
+        if node.state.to_json() == goal_state.to_json():
+            return node
+
+        if node.parent is not None:
+            step += 1
+
+        state_json = node.state.to_json()
+        state_hash = hash(state_json)
+        reached_hashes.add(state_hash)
+
+        reached.add(state_json)
+
+        for child_node in node.successors():
+            s = child_node.state
+            s_json = s.to_json()
+            child_hash = hash(s_json)
+            if child_hash in reached_hashes:
+                continue
+            reached_hashes.add(child_hash)
+            
+            if s == goal_state:
+                return child_node
+            if s_json not in reached:
+                reached.add(s_json)
+                frontier.append(child_node)
+
+    return None
+
 def main():
-    args = parse_arguments()  # Parse command-line arguments
-    initial_state, goal_state = parse_input_file(args.filename)  # Parse the input file
-    
-    # Initialize other parameters
-    
-    path, iterations, max_queue_size = astar(initial_state, goal_state, args.MAX_ITERS)
+    file_path = ".\probA04.bwp"
+    initial_state, goal_state = parse_file(file_path)
 
-    if path == "FAILED":
-        print("Solution not found within the maximum number of iterations.")
+    if initial_state is not None and goal_state is not None:
+        print("Initial State:")
+        print_state(initial_state)
+        print("Goal State:")
+        print_state(goal_state)
+    
+    solution_node = bfs(initial_state, goal_state)
+
+    if solution_node is not None:
+        print("Solution:")
+        steps = []
+        while solution_node is not None:
+            steps.insert(0, solution_node)
+            solution_node = solution_node.parent
+
+        step = 0
+        for node in steps:
+            print(f"Step {step}:")
+            if node.action:
+                print(f"Action: {node.action}")
+            print_state(node.state)
+            step += 1
     else:
-        print("Solution path:", path)
-    
-    print(f"Statistics: planlen {len(path)}, iters {iterations}, maxq {max_queue_size}")
-
+        print("No solution found.")
 if __name__ == "__main__":
     main()
