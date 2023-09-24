@@ -1,6 +1,9 @@
 import heapq
 import sys
 import json
+import argparse
+import blocksworld
+import os
 
 class State:
     def __init__(self, stacks):
@@ -32,11 +35,15 @@ class State:
         return self.stacks == other.stacks
 
 class Node:
-    def __init__(self, state, parent=None, action=None, depth=0):
+    def __init__(self, state, parent=None, action=None, depth=0, cost=0):
         self.state = state
-        self.parent = parent  # Parent Node
-        self.action = action  # Action that led to this state
-        self.depth = depth    # Depth in the tree
+        self.parent = parent
+        self.action = action
+        self.depth = depth 
+        self.cost = cost
+
+    def __lt__(self, other):
+        return self.cost < other.cost 
 
     def successors(self):
         child_nodes = []
@@ -89,24 +96,25 @@ def parse_file(file_path):
 def print_state(state):
     for stack in state.stacks:
         print("".join(stack))
-    print() 
 
-def heuristic_h0(state, goal_state):
+def h0(state, goal_state):
+    return 0
+
+def h1(state, goal_state):
     pass
 
-def bfs(initial_state, goal_state):
-    frontier = [Node(initial_state)]
+def bfs(initial_state, goal_state, heuristic, max_iterations=None):
+    frontier = [(0, Node(initial_state))]
     reached = set()
     reached_hashes = set()
+    iterations = 0
+    max_queue_size = 0
 
-    step = 1
     while frontier:
-        node = frontier.pop(0)
+        max_queue_size = max(max_queue_size, len(frontier))
+        _, node = heapq.heappop(frontier)
         if node.state.to_json() == goal_state.to_json():
-            return node
-
-        if node.parent is not None:
-            step += 1
+            return node, iterations, max_queue_size
 
         state_json = node.state.to_json()
         state_hash = hash(state_json)
@@ -115,48 +123,79 @@ def bfs(initial_state, goal_state):
         reached.add(state_json)
 
         for child_node in node.successors():
+            iterations += 1
             s = child_node.state
             s_json = s.to_json()
             child_hash = hash(s_json)
             if child_hash in reached_hashes:
                 continue
-            reached_hashes.add(child_hash)
-            
+
             if s == goal_state:
-                return child_node
+                return child_node, iterations, max_queue_size
             if s_json not in reached:
                 reached.add(s_json)
-                frontier.append(child_node)
+                child_node.cost = child_node.depth + heuristic(s, goal_state)
+                heapq.heappush(frontier, (child_node.cost, child_node))
 
-    return None
+        if max_iterations is not None and iterations >= max_iterations:
+            break
+
+    return None, iterations, max_queue_size
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument("file_path", help="Path to the input file (e.g., 'probs/probA03.bwp')")
+    parser.add_argument("--heuristic", default="h0", choices=["h0"], help="Heuristic function to use (h0). Default is 'h0'.")
+    parser.add_argument("--max_iterations", type=int, default=None, help="Maximum number of iterations (optional).")
+    return parser.parse_args()   
 
 def main():
-    file_path = ".\probA04.bwp"
+    args = parse_args()
+    file_path = args.file_path
+    heuristic = args.heuristic
+    max_iterations = args.max_iterations
+
+    if not os.path.isfile(file_path): #none type issue
+        print(f"Error: File '{file_path}' does not exist.")
+        return
+
     initial_state, goal_state = parse_file(file_path)
 
     if initial_state is not None and goal_state is not None:
-        print("Initial State:")
+        print("Input File:", file_path)
+        print("Method Used: BFS")
+        print("Heuristic Used:", heuristic)
+        print("Maximum Iterations:", max_iterations)
+        print(">>>>>>>>>>")
         print_state(initial_state)
-        print("Goal State:")
+        print(">>>>>>>>>>")
         print_state(goal_state)
-    
-    solution_node = bfs(initial_state, goal_state)
+        print(">>>>>>>>>>")
+
+    solution_node, iterations, max_queue_size = bfs(initial_state, goal_state, getattr(blocksworld, heuristic), max_iterations)
 
     if solution_node is not None:
+        print("====================================================")
         print("Solution:")
         steps = []
         while solution_node is not None:
             steps.insert(0, solution_node)
             solution_node = solution_node.parent
 
-        step = 0
+        path_cost = 0
         for node in steps:
-            print(f"Step {step}:")
             if node.action:
                 print(f"Action: {node.action}")
+            path_cost += 1
+            heuristic_value = h0(node.state, goal_state)
+            fn = path_cost + heuristic_value
+            print(f"move {path_cost-1}, pathcost={path_cost-1}, heuristic={heuristic_value}, f(n)=g(n)+h(n)={fn}")
             print_state(node.state)
-            step += 1
+            print(">>>>>>>>>>")
+        
+        print(f"statistics: {file_path} method BFS planlen {path_cost} iter {iterations} maxq {max_queue_size}")
     else:
         print("No solution found.")
+
 if __name__ == "__main__":
     main()
