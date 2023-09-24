@@ -97,11 +97,16 @@ def print_state(state):
     for stack in state.stacks:
         print("".join(stack))
 
-def h0(state, goal_state):
+def H0(state, goal_state):
     return 0
 
-def h1(state, goal_state):
-    pass
+def H1(state, goal_state):
+    misplaced = 0
+    for current_stack, goal_stack in zip(state.stacks, goal_state.stacks):
+        for current_block, goal_block in zip(current_stack, goal_stack):
+            if current_block != goal_block:
+                misplaced += 1
+    return misplaced
 
 def bfs(initial_state, goal_state, heuristic, max_iterations=None):
     frontier = [(0, Node(initial_state))]
@@ -143,17 +148,19 @@ def bfs(initial_state, goal_state, heuristic, max_iterations=None):
     return None, iterations, max_queue_size
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="")
+    parser = argparse.ArgumentParser(description="", usage="blocksworld.py <file path> -H <heuristic> -MAX_ITERS <maximum iterations> -SHOW_STEPS <true/false>")
     parser.add_argument("file_path", help="Path to the input file (e.g., 'probs/probA03.bwp')")
-    parser.add_argument("--heuristic", default="h0", choices=["h0"], help="Heuristic function to use (h0). Default is 'h0'.")
-    parser.add_argument("--max_iterations", type=int, default=None, help="Maximum number of iterations (optional).")
+    parser.add_argument("-H", default="H0", choices=["H0", "H1"], help="Heuristic function to use (H0, H1).")
+    parser.add_argument("-MAX_ITERS", type=int, default=1000000, help="Maximum number of iterations (optional).")
+    parser.add_argument("-SHOW_STEPS", type=bool, default=False, help="Show steps to get to goal state (optional).")
     return parser.parse_args()   
 
 def main():
     args = parse_args()
     file_path = args.file_path
-    heuristic = args.heuristic
-    max_iterations = args.max_iterations
+    heuristic = args.H
+    max_iterations = args.MAX_ITERS
+    show_steps = args.SHOW_STEPS
 
     if not os.path.isfile(file_path): #none type issue
         print(f"Error: File '{file_path}' does not exist.")
@@ -177,6 +184,7 @@ def main():
     if solution_node is not None:
         print("====================================================")
         print("Solution:")
+        h = getattr(blocksworld, heuristic) #string to function
         steps = []
         while solution_node is not None:
             steps.insert(0, solution_node)
@@ -184,10 +192,10 @@ def main():
 
         path_cost = 0
         for node in steps:
-            if node.action:
+            if show_steps:
                 print(f"Action: {node.action}")
             path_cost += 1
-            heuristic_value = h0(node.state, goal_state)
+            heuristic_value = h(node.state, goal_state)
             fn = path_cost + heuristic_value
             print(f"move {path_cost-1}, pathcost={path_cost-1}, heuristic={heuristic_value}, f(n)=g(n)+h(n)={fn}")
             print_state(node.state)
