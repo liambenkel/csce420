@@ -111,34 +111,34 @@ def H2(state, goal_state): #how far it is on the stack, if one block has to go u
     return len(goal_state.stacks) - correct_blocks
 
 def H3(state, goal_state): #check if bottom layer is correct
-    misplaced_bottom_blocks = 0
+    misplaced_blocks = 0
 
-    for current_stack, goal_stack in zip(state.stacks, goal_state.stacks):
-        if current_stack and goal_stack:
-            current_bottom_block = current_stack[0]
-            goal_bottom_block = goal_stack[0]
-            if current_bottom_block != goal_bottom_block:
-                misplaced_bottom_blocks += 1
+    for curr_stack, goal_stack in zip(state.stacks, goal_state.stacks):
+        if curr_stack and goal_stack:
+            curr_block = curr_stack[0]
+            goal_block = goal_stack[0]
+            if curr_block != goal_block:
+                misplaced_blocks += 1
 
-    return misplaced_bottom_blocks
+    return misplaced_blocks
 
 def H4(state, goal_state):
     total_cost = 0
 
     for i in range(len(state.stacks)):
-        current_stack = state.stacks[i]
+        curr_stack = state.stacks[i]
         goal_stack = goal_state.stacks[i]
 
-        for j in range(len(current_stack)):
-            current_block = current_stack[j]
-            if current_block in goal_stack:
+        for j in range(len(curr_stack)):
+            curr_block = curr_stack[j]
+            if curr_block in goal_stack:
                 #manhattan distance
-                goal_index = goal_stack.index(current_block)
+                goal_index = goal_stack.index(curr_block)
                 distance = abs(j - goal_index)
                 total_cost += distance
             else:
                 # if block is not in the goal stack add a cost for moving it to the goal stack
-                total_cost += len(current_stack) - j
+                total_cost += len(curr_stack) - j
 
     return total_cost
 
@@ -207,7 +207,10 @@ def parse_args():
 
 def main():
     file_path, heuristic, max_iters, show_steps = parse_args()
-    method = ""
+    if heuristic == "H0":
+        method = "BFS"
+    else:
+        method = "A*"
 
     if not os.path.isfile(file_path): #none type issue
         print(f"Error: File '{file_path}' does not exist.")
@@ -217,10 +220,6 @@ def main():
 
     if initial_state is not None and goal_state is not None:
         print("Input File:", file_path)
-        if heuristic == "H0":
-            method = "BFS"
-        else:
-            method = "A*"
         print("Method Used:", method)
         print("Heuristic Used:", heuristic)
         print("Maximum Iterations:", max_iters)
@@ -252,7 +251,7 @@ def main():
             print_state(node.state)
             print(">>>>>>>>>>")
         
-        print(f"statistics: {file_path} method BFS planlen {path_cost} iter {iterations} maxq {max_queue_size}")
+        print(f"statistics: {file_path} method {method} planlen {path_cost} iter {iterations} maxq {max_queue_size}")
     else:
         print("No solution found.")
 
