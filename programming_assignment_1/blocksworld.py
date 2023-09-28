@@ -57,7 +57,7 @@ class Node:
 
                         new_state.move_block(i, j)
 
-                        action = "Move block from stack", i," to stack", j
+                        action = f"Move block from stack {i} to stack {j}"
                         child_node = Node(new_state, parent=self, action=action, depth=self.depth + 1)
                         child_nodes.append(child_node)
 
