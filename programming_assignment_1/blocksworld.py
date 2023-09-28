@@ -210,7 +210,7 @@ def main():
     if heuristic == "H0":
         method = "BFS"
     else:
-        method = "A*"
+        method = "Astar"
 
     if not os.path.isfile(file_path): #none type issue
         print(f"Error: File '{file_path}' does not exist.")
