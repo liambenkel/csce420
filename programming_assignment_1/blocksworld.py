@@ -183,13 +183,14 @@ def bfs(initial_state, goal_state, heuristic, max_iters):
 
 def parse_args():
     if len(sys.argv) < 2:
-        print("Usage: blocksworld.py <file path> -H <heuristic> -MAX_ITERS <maximum iterations> -SHOW_STEPS <true/false>")
+        print("Usage: blocksworld.py <file path> -H <heuristic> -MAX_ITERS <maximum iterations> -SHOW_STEPS <true/false> -STAT_TBL <true/false>")
         sys.exit(1)
     available_heuristics = ["H0", "H1", "H2", "H3", "H4"]
     file_path = sys.argv[1]
-    heuristic = "H0"
+    heuristic = "H4"
     max_iters = 1000000
     show_steps = False
+    stat_table = False
 
     for i in range(2, len(sys.argv), 2):
         if sys.argv[i] == "-H":
@@ -202,11 +203,36 @@ def parse_args():
             max_iters = int(sys.argv[i + 1])
         elif sys.argv[i] == "-SHOW_STEPS":
             show_steps = sys.argv[i + 1].lower() == "true"
+        elif sys.argv[i] == "-STAT_TBL":
+            stat_table = sys.argv[i + 1].lower() == "true"
 
-    return file_path, heuristic, max_iters, show_steps  
+    return file_path, heuristic, max_iters, show_steps, stat_table  
 
 def main():
-    file_path, heuristic, max_iters, show_steps = parse_args()
+    file_path, heuristic, max_iters, show_steps, stat_table = parse_args()
+    if stat_table:
+        for filename in os.listdir("probs/"):
+            if filename.endswith(".bwp"):
+                file_path = os.path.join("probs/", filename)
+                if os.path.isfile(file_path):
+                    initial_state, goal_state = parse_file(file_path)
+
+                    if initial_state is not None and goal_state is not None:
+                        solution_node, iterations, max_queue_size = bfs(initial_state, goal_state, getattr(blocksworld, heuristic), max_iters)
+
+                        if solution_node is not None:
+                            h = getattr(blocksworld, heuristic)  # string to function
+                            steps = []
+                            while solution_node is not None:
+                                steps.insert(0, solution_node)
+                                solution_node = solution_node.parent
+
+                            path_cost = 0
+                            for node in steps:
+                                path_cost += 1
+
+                            print(f"statistics: {file_path} method BFS planlen {path_cost} iter {iterations} maxq {max_queue_size}")
+        sys.exit(1)
     if heuristic == "H0":
         method = "BFS"
     else:
