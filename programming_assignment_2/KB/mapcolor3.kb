@@ -1,4 +1,7 @@
-(or QR QG)
+QB
+
+QR
+
 (-> WAR (and (not WAG) (not WAB)))
 (-> WAG (and (not WAR) (not WAB)))
 (-> WAB (and (not WAG) (not WAR)))
@@ -38,10 +41,6 @@
 (-> SAR (and (and (and (not NSWR) (not WAR)) (and (not QR) (not NTR))) (not VR)))
 (-> SAB (and (and (and (not NSWB) (not WAB)) (and (not QB) (not NTB))) (not VB)))
 (-> SAG (and (and (and (not NSWG) (not WAG)) (and (not QG) (not NTG))) (not VG)))
-
-(-> QR (and (not NSWR) (and (not NTR) (not SAR))))
-(-> QB (and (not NSWB) (and (not NTB) (not SAB))))
-(-> QG (and (not NSWG) (and (not NTG) (not SAG))))
 
 (-> NSWR (and (and (not VR) (not SAR)) (not QR)))
 (-> NSWB (and (and (not VB) (not SAB)) (not QB)))

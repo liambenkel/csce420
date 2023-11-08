@@ -1,4 +1,3 @@
-(or QR QG)
 (-> WAR (and (not WAG) (not WAB)))
 (-> WAG (and (not WAR) (not WAB)))
 (-> WAB (and (not WAG) (not WAR)))

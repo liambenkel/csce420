@@ -1,6 +1,5 @@
 *.aux
 *.synctex.gz
 *.log
-*.txt
 *.pyc
 *.tmp

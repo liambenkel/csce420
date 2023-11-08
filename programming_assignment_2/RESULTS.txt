@@ -1,0 +1,12 @@
+|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Command Line Input                                      | Model Output                                        | DPLL calls without UCH | DPLL calls with UCH (+UCH) |
+|---------------------------------------------------------|-----------------------------------------------------|------------------------|----------------------------|
+| python3 DPLL.py .\CNF\mapcolor.cnf                      | NSWR NTR QG SAB TG VG WAG                           | 36                     | 22                         |
+| python3 DPLL.py .\CNF\mapcolor2.cnf                     | NSWG NTB QR TG VR WAG                               | 37                     | 22                         |
+| python3 DPLL.py .\CNF\sammy.cnf O1Y O2W O3Y L1W L2Y L3B | C1B C2W C3Y L1W L1Y L2B L2Y L3B O1W O1Y O2W O3Y     | 117                    | 15                         |
+| python3 DPLL.py .\CNF\sammy.cnf O1W O2Y O3W L1W L2B L3B | C1B C2Y C3W L1W L1Y L2B L2W L3B L3Y O1W O1Y O2Y O3W | 70                     | 15                         |
+| python3 DPLL.py .\CNF\3queens.cnf                       | Unsatisfiable                                       | 43                     | 24                         |
+| python3 DPLL.py .\CNF\4queens.cnf                       | Q12 Q24 Q31 Q43                                     | 71                     | 38                         |
+| python3 DPLL.py .\CNF\5queens.cnf                       | Q11 Q23 Q35 Q42 Q54                                 | 46                     | 26                         |
+| python3 DPLL.py .\CNF\6queens.cnf                       | Q12 Q24 Q36 Q41 Q53 Q65                             | 483                    | 145                        |
+|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
