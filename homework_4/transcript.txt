@@ -1,0 +1,332 @@
+GNU Prolog 1.5.0 (64 bits)
+Compiled Jul  8 2021, 12:33:56 with cl
+Copyright (C) 1999-2021 Daniel Diaz
+
+| ?- change_directory('C:/Users/liamb/csce420/homework_4').
+
+yes
+| ?- [solutions].
+compiling C:/Users/liamb/csce420/homework_4/solutions.pl for byte code...
+C:/Users/liamb/csce420/homework_4/solutions.pl compiled, 124 lines read - 16983 bytes written, 10 ms
+
+yes
+
+==========
+Question 1
+==========
+
+| ?- brother(rod,X).
+
+X = tod ? ;
+
+no
+| ?- sister(marge,X).
+
+X = patty ? ;
+
+X = selma
+
+yes
+| ?- aunt(X,patty).
+
+X = bart ? ;
+
+X = lisa ? ;
+
+X = maggie ? ;
+
+no
+| ?- uncle(bart,X).
+
+X = herb ? ;
+
+no
+| ?- grandfather(maggie,X).
+
+X = abraham ? ;
+
+no
+| ?- granddaughter(jackie,D).
+
+D = lisa ? ;
+
+D = maggie ? ;
+
+no
+| ?- ancestor(bart,X).
+
+X = homer ? ;
+
+X = marge ? ;
+
+X = abraham ? ;
+
+X = jackie ? ;
+
+no
+
+==========
+Question 2
+==========
+
+| ?- is_lawyer(X).
+
+X = sam ? ;
+
+X = bill ? ;
+
+X = joan ? ;
+
+no
+| ?- is_surgeon(X), address(X, los_angeles).
+
+X = lance ? ;
+
+no
+| ?- is_surgeon(X), in_texas(X), salary(X, Salary), Salary > 100000.
+
+Salary = 190000
+X = lisa ? ;
+
+Salary = 120000
+X = charlie ? ;
+
+no
+
+==========
+Question 3
+==========
+
+| ?-  canTeach(X,Y).
+
+X = bill
+Y = organic ? ;
+
+X = bill
+Y = inorganic ? ;
+
+X = susan
+Y = algebra ? ;
+
+X = susan
+Y = calculus ? ;
+
+no
+| ?-  canTeach2(X,Y).
+
+X = susan
+Y = algebra ? ;
+
+X = susan
+Y = calculus ? ;
+
+no
+| ?-  canTeach3(X,Y).
+
+X = susan
+Y = algebra ? ;
+
+X = susan
+Y = calculus ? ;
+
+X = chuck
+Y = dynamics ? ;
+
+X = chuck
+Y = electromagnetism ? ;
+
+X = chuck
+Y = nuclear ? ;
+
+no
+
+==========
+Question 4
+==========
+
+| ?- octal_code(A,B,C).
+000
+
+A = 0
+B = 0
+C = 0 ? ;
+001
+
+A = 0
+B = 0
+C = 1 ? ;
+010
+
+A = 0
+B = 1
+C = 0 ? ;
+011
+
+A = 0
+B = 1
+C = 1 ? ;
+100
+
+A = 1
+B = 0
+C = 0 ? ;
+101
+
+A = 1
+B = 0
+C = 1 ? ;
+110
+
+A = 1
+B = 1
+C = 0 ? ;
+111
+
+A = 1
+B = 1
+C = 1
+
+yes
+
+==========
+Question 5
+==========
+
+| ?- mapcolor(WA,NT,SA,Q,NSW,V,T).
+
+NSW = green
+NT = green
+Q = red
+SA = blue
+T = green
+V = red
+WA = red ? ;
+
+NSW = green
+NT = green
+Q = red
+SA = blue
+T = blue
+V = red
+WA = red ? ;
+
+NSW = blue
+NT = blue
+Q = red
+SA = green
+T = green
+V = red
+WA = red ? ;
+
+NSW = blue
+NT = blue
+Q = red
+SA = green
+T = blue
+V = red
+WA = red ? ;
+
+NSW = red
+NT = red
+Q = green
+SA = blue
+T = red
+V = green
+WA = green ? ;
+
+NSW = red
+NT = red
+Q = green
+SA = blue
+T = blue
+V = green
+WA = green ? ;
+
+NSW = blue
+NT = blue
+Q = green
+SA = red
+T = red
+V = green
+WA = green ? ;
+
+NSW = blue
+NT = blue
+Q = green
+SA = red
+T = blue
+V = green
+WA = green ? ;
+
+NSW = red
+NT = red
+Q = blue
+SA = green
+T = red
+V = blue
+WA = blue ? ;
+
+NSW = red
+NT = red
+Q = blue
+SA = green
+T = green
+V = blue
+WA = blue ? ;
+
+NSW = green
+NT = green
+Q = blue
+SA = red
+T = red
+V = blue
+WA = blue ? ;
+
+NSW = green
+NT = green
+Q = blue
+SA = red
+T = green
+V = blue
+WA = blue ? ;
+
+(32 ms) no
+| ?- WA=green, mapcolor(WA,NT,SA,Q,NSW,V,T).
+
+NSW = red
+NT = red
+Q = green
+SA = blue
+T = red
+V = green
+WA = green ? ;
+
+NSW = red
+NT = red
+Q = green
+SA = blue
+T = blue
+V = green
+WA = green ? ;
+
+NSW = blue
+NT = blue
+Q = green
+SA = red
+T = red
+V = green
+WA = green ? ;
+
+NSW = blue
+NT = blue
+Q = green
+SA = red
+T = blue
+V = green
+WA = green ? ;
+
+no
+| ?- WA=red, Q=green, mapcolor(WA,NT,SA,Q,NSW,V,T).
+
+no
+| ?- 
